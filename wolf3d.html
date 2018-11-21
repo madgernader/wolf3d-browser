@@ -2,9 +2,9 @@
 <html lang="en-US">
 <head>
 	<!--
-	Copyright (C) 2012 id Software LLC, a ZeniMax Media company. 
-	
-	This file is part of the WOLF3D Browser Version GPL Source Code. 
+	Copyright (C) 2012 id Software LLC, a ZeniMax Media company.
+
+	This file is part of the WOLF3D Browser Version GPL Source Code.
 	-->
 	<meta charset="UTF-8">
     <meta http-equiv="pragma" content="no-cache" />
@@ -16,8 +16,9 @@
 	<title>Wolfenstein 3D</title>
     <link rel="stylesheet" href="styles.css">
 
+    <script src="js/yepnope-1.5.4.js"></script> <!--yepnope is deprecated-->
     <script src="js/modernizr.custom.js"></script>
-    <script src="js/jquery-1.7.1.min.js"></script>
+    <script src="js/jquery-1.7.1.min.js"></script> <!--was 1.7.1, installed 3.3.1 locally-->
     <script src="js/load.js"></script>
 
 </head>
@@ -25,7 +26,7 @@
 
 <div id="main">
     <div id="title-screen"></div>
-    
+
     <div id="menu">
         <div class="message confirm-newgame">
             <div class="box"></div>
@@ -40,7 +41,7 @@
                 <li class="resumegame"><div class="button"></div></li>
             </ul>
         </div>
-        
+
         <div class="menu sound" data-backmenu="main">
             <ul class="selector">
                 <li class="sfxon"><div class="button"><div class="light"></div></div></li>
@@ -49,14 +50,14 @@
                 <li class="musicoff"><div class="button"><div class="light"></div></div></li>
             </ul>
         </div>
-        
+
         <div class="menu control" data-backmenu="main">
             <ul class="selector">
                 <li class="mouseenabled"><div class="button"><div class="light"></div></div></li>
                 <li data-submenu="customize" class="customize"><div class="button"></div></li>
             </ul>
         </div>
-        
+
         <div class="menu customize" data-backmenu="control">
             <ul class="selector">
                 <li class="customizekeys line1"><div class="button">
@@ -73,7 +74,7 @@
                 </div></li>
             </ul>
         </div>
-        
+
         <div class="menu skill" data-backmenu="episodes">
             <div class="face"></div>
             <ul class="selector">
@@ -83,7 +84,7 @@
                 <li data-submenu="levels" data-skill="gd_hard" class="hard"><div class="button"></div></li>
             </ul>
         </div>
-        
+
         <div class="menu episodes" data-backmenu="main">
             <ul>
                 <li data-episode="0" class="episode-0"><div class="button"></div></li>
@@ -108,15 +109,15 @@
                 <li data-level="9" class="level-9"><div class="button"></div></li>
             </ul>
         </div>
-            
+
     </div>
-    
+
     <div id="text-screen"></div>
-    
- 
+
+
     <div id="game">
         <div class="fps"></div>
-        
+
         <div class="renderer">
             <div class="ceiling"></div>
             <div class="floor"></div>
@@ -126,23 +127,23 @@
             <div class="death overlay"></div>
             <div class="pause overlay"><img alt="" src="art/paused.png"/></div>
         </div>
-        
+
         <div class="loading"><img alt="" src="art/getpsyched.png"/></div>
-        
+
         <div class="gameover"></div>
-        
+
         <div class="intermission">
             <div class="background"></div>
             <div class="background-secret"></div>
             <div class="background-victory"></div>
-            
+
             <div class="bj"></div>
-            
+
             <div class="floor stat">
                 <div class="digit"></div>
                 <div class="digit"></div>
             </div>
-            
+
             <div class="bonus stat">
                 <div class="digit"></div>
                 <div class="digit"></div>
@@ -151,7 +152,7 @@
                 <div class="digit"></div>
                 <div class="digit"></div>
             </div>
-            
+
             <div class="total-time-minutes victory-stat">
                 <div class="digit"></div><div class="digit"></div>
             </div>
@@ -191,7 +192,7 @@
                 <div class="digit"></div>
                 <div class="digit"></div>
             </div>
-            
+
             <div class="avg-kill-ratio victory-stat">
                 <div class="digit"></div><div class="digit"></div><div class="digit"></div>
             </div>
@@ -202,8 +203,8 @@
                 <div class="digit"></div><div class="digit"></div><div class="digit"></div>
             </div>
         </div>
-       
-        
+
+
         <div class="hud">
             <div class="floor number-container">
                 <div class="number"></div>

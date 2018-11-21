@@ -1,32 +1,32 @@
 /*
 * ===========================================================================
-* 
+*
 * Wolf3D Browser Version GPL Source Code
-* Copyright (C) 2012 id Software LLC, a ZeniMax Media company. 
-* 
-* This file is part of the Wolf3D Browser Version GPL Source Code ("Wolf3D Browser Source Code").  
-* 
+* Copyright (C) 2012 id Software LLC, a ZeniMax Media company.
+*
+* This file is part of the Wolf3D Browser Version GPL Source Code ("Wolf3D Browser Source Code").
+*
 * Wolf3D Browser Source Code is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 2 of the License, or
 * (at your option) any later version.
-* 
+*
 * Wolf3D Browser Source Code is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License version 2
 * along with Wolf3D Browser Source Code.  If not, see <http://www.gnu.org/licenses/>.
-* 
+*
 * If you have questions concerning this license, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
-* 
+*
 * ===========================================================================
 */
 
- 
-/** 
- * @namespace 
+
+/**
+ * @namespace
  * @description Game management
  */
 Wolf.Game = (function() {
@@ -42,7 +42,7 @@ Wolf.Game = (function() {
         MAXMOUSETURN    : 10,
         TURNANGLESCALE  : 300,
         MOUSEDEADBAND   : 0.2,
-        
+
         gd_baby         : 0,
         gd_easy         : 1,
         gd_medium       : 2,
@@ -85,14 +85,14 @@ Wolf.Game = (function() {
         },
         ticsPerSecond = 70,
         lastTimeCount = 0;
-        
+
     /**
      * @description Build the movement, angles, and buttons for a frame of action:
      *   Player.angle
      *   Player.cmd.buttons
      *   Player.cmd.forwardMove
      *   Player.cmd.sideMove
-     * @private 
+     * @private
      * @param {object} player The player object.
      * @param {number} tics The number of tics since last frame.
      */
@@ -107,24 +107,24 @@ Wolf.Game = (function() {
             changeWeapon = -1,
             mouseMovement,
             mouseCoords;
-       
+
         player.cmd.buttons = 0;
         player.cmd.forwardMove = 0;
         player.cmd.sideMove = 0;
-        
+
         leftKey = Wolf.Input.checkKeys(controls.left);
         rightKey = Wolf.Input.checkKeys(controls.right);
         downKey = Wolf.Input.checkKeys(controls.down);
         upKey = Wolf.Input.checkKeys(controls.up);
-        
+
         running = Wolf.Input.checkKeys(controls.run);
         strafing = Wolf.Input.checkKeys(controls.strafe);
         moveValue = (running ? Wolf.RUNMOVE : Wolf.BASEMOVE);
-       
+
         if (Wolf.Input.checkKeys(controls.attack) || (mouseEnabled && Wolf.Input.leftMouseDown())) {
             player.cmd.buttons |= Wolf.BUTTON_ATTACK;
         }
-       
+
         if (mouseEnabled && Wolf.Input.rightMouseDown()) {
             if (mouseCoords = Wolf.Input.getMouseCoords()) {
                 player.cmd.forwardMove += - (mouseCoords.y < 0 ? Wolf.MOVESCALE : Wolf.BACKMOVESCALE) * moveValue * mouseCoords.y;
@@ -135,7 +135,7 @@ Wolf.Game = (function() {
             }
             if (downKey) {
                 player.cmd.forwardMove += -moveValue * Wolf.BACKMOVESCALE;
-            } 
+            }
         }
 
         if (mouseEnabled && Wolf.Input.isPointerLocked()) {
@@ -156,14 +156,14 @@ Wolf.Game = (function() {
                     player.angle -= Wolf.TURNANGLESCALE * tics;
                 }
             }
-            
+
             if (mouseEnabled && (mouseCoords = Wolf.Input.getMouseCoords())) {
                 if (Math.abs(mouseCoords.x) > Wolf.MOUSEDEADBAND) {
                     player.angle -= (Wolf.TURNANGLESCALE * tics * (mouseCoords.x + (mouseCoords.x < 0 ? 1 : -1) * Wolf.MOUSEDEADBAND))>>0;
                 }
             }
         }
-        
+
         // change weapon?
         if (Wolf.Input.checkKeys(controls.weapon1) && player.items & Wolf.ITEM_WEAPON_1) {
             changeWeapon = Wolf.WEAPON_KNIFE;
@@ -178,7 +178,7 @@ Wolf.Game = (function() {
             player.previousWeapon = Wolf.WEAPON_KNIFE;
             player.weapon = player.pendingWeapon = changeWeapon;
         }
-        
+
         if (Wolf.Input.checkKeys(controls.use)) {
             player.cmd.buttons |= Wolf.BUTTON_USE;
         }
@@ -192,7 +192,7 @@ Wolf.Game = (function() {
     function startGameCycle(game) {
         var deathTics = 0,
             deathTicsMax = ticsPerSecond * 2;
-            
+
         // cancel existing game cycle
         if (hndCycle) {
             clearTimeout(hndCycle);
@@ -203,24 +203,24 @@ Wolf.Game = (function() {
             if (!playing) {
                 return;
             }
-        
+
             hndCycle = setTimeout(nextCycle, 1000 / 30);
             cycleNum++;
 
             if (paused) {
                 return;
             }
-            
+
             var player = game.player,
                 level = game.level,
                 lives, score,
                 tics = calcTics();
-            
+
             if (player.playstate != Wolf.ex_dead) {
                 updatePlayerControls(player, tics);
-        
+
                 player.angle = Wolf.Math.normalizeAngle(player.angle);
-        
+
                 Wolf.Player.process(game, player, tics);
                 if (processAI) {
                     Wolf.Actors.process(game, tics);
@@ -228,7 +228,7 @@ Wolf.Game = (function() {
                 Wolf.PushWall.process(level, tics);
                 Wolf.Doors.process(level, player, tics);
             } else {
-           
+
                 if (died(game, tics)) {
                     deathTics += tics;
                     if (deathTics >= deathTicsMax) {
@@ -260,19 +260,19 @@ Wolf.Game = (function() {
             }
             Wolf.Sprites.clean(level);
             updateHUD(game, tics);
-           
+
         }
-        
+
         lastTimeCount = (new Date).getTime();
         nextCycle();
     }
-    
-    
+
+
     function died(game, tics) {
         var fangle,
             dx, dy,
             iangle, curangle,
-            clockwise, 
+            clockwise,
             counter,
             change,
             player = game.player,
@@ -342,7 +342,7 @@ Wolf.Game = (function() {
         }
         return false;
     }
-    
+
     /**
      * @description Game over. No more lives.
      * @private
@@ -351,12 +351,12 @@ Wolf.Game = (function() {
     function gameOver(game) {
         playing = false;
         rendering = false;
-        
+
         $("#game .renderer").hide();
         $("#game .fps").hide();
         $("#game .gameover").show();
         endGame();
-        
+
         function exit() {
             $(document).off("keydown", progress);
             $("#game").fadeOut(null, function() {
@@ -375,8 +375,8 @@ Wolf.Game = (function() {
         }
         $(document).on("keydown", progress);
     }
-    
-    
+
+
     function victory(game) {
         if (game.player.playstate == Wolf.ex_victory) {
             return;
@@ -387,11 +387,11 @@ Wolf.Game = (function() {
         Wolf.Actors.spawnBJVictory(game.player, game.level, game.skill);
         game.player.playstate = Wolf.ex_victory;
     }
-    
+
     function endEpisode(game) {
         Wolf.Game.startIntermission(game);
     }
-    
+
     /**
      * @description Calculate the number of tics since last time calcTics() was called.
      *              Accumulates fractions.
@@ -404,13 +404,13 @@ Wolf.Game = (function() {
             tics = Math.floor(ticsPerSecond * delta);
 
         lastTimeCount += (tics * 1000 / ticsPerSecond) >> 0;
-        
+
         return tics;
     }
 
     /**
      * @description Update HUD stats
-     * @private 
+     * @private
      * @param {string} name The name/class of the player stat (health, ammo, etc.)
      * @param {number} value The new value
      */
@@ -425,13 +425,13 @@ Wolf.Game = (function() {
             }
         }
     }
-    
-    
-    
-    
+
+
+
+
     /**
      * @description Update the HUD
-     * @private 
+     * @private
      * @param {object} game The game object
      */
     function updateHUD(game, tics) {
@@ -446,30 +446,30 @@ Wolf.Game = (function() {
                 backgroundPosition : - (frame * Wolf.HUD_WEAPON_WIDTH) + "px 0"
             });
         }
-        
+
         $("#game .hud .weapon").css({
             backgroundPosition : - (player.weapon * 96) + "px 0"
         });
-        
+
         $("#game .hud .key1").css({
             display : (player.items & Wolf.ITEM_KEY_1) ? "block" : "none"
         });
         $("#game .hud .key2").css({
             display : (player.items & Wolf.ITEM_KEY_2) ? "block" : "none"
         });
-        
+
         updateStat("ammo", player.ammo[Wolf.AMMO_BULLETS]);
         updateStat("health", player.health);
         updateStat("lives", player.lives);
         updateStat("score", player.score);
         updateStat("floor", game.levelNum+1);
-        
+
         drawFace(player, tics);
     }
-    
+
     /**
      * @description Update the game display
-     * @private 
+     * @private
      * @param {object} game The game object
      */
     function updateScreen(game) {
@@ -480,18 +480,18 @@ Wolf.Game = (function() {
                 y : player.position.y,
                 angle : player.angle
             };
-        
+
         var res = Wolf.Raycaster.traceRays(viewport, level);
-        
+
         Wolf.Renderer.clear();
         Wolf.Renderer.draw(viewport, level, res.tracers, res.visibleTiles);
     }
-    
+
 
 
      /**
      * @description Update BJ face pic
-     * @private 
+     * @private
      * @param {object} player
      * @param {number} tics
      */
@@ -525,7 +525,7 @@ Wolf.Game = (function() {
                     h = 0;
                 }
                 pic = (3*((100-h)/16)>>0) + player.faceFrame;
-                
+
                 //gsh
                 if ((player.flags & Wolf.FL_GODMODE)) {
                     pic = 23 + player.faceFrame;
@@ -540,10 +540,10 @@ Wolf.Game = (function() {
         });
     }
 
-    
+
     /**
      * @description Update the FPS counter
-     * @private 
+     * @private
      */
     function updateFPS() {
         var now = (new Date).getTime(),
@@ -552,13 +552,13 @@ Wolf.Game = (function() {
 
         lastFPSTime = now;
         lastFrame = frameNum;
-        
+
         $("#game .fps").html((frames / dt).toFixed(2));
     }
 
     /**
      * @description Initiate the rendering cycle
-     * @private 
+     * @private
      * @param {object} game The game object
      */
     function startRenderCycle(game) {
@@ -567,18 +567,18 @@ Wolf.Game = (function() {
             cancelAnimationFrame(hndRender);
             hndRender = 0;
         }
-        
+
         /*
         if (!hndFps) {
             hndFps = setInterval(updateFPS, 1000);
         }
         $("#game .fps").show();
         */
-        
+
         Wolf.Renderer.init();
-        
+
         $("#game .renderer").show();
-        
+
         function nextFrame() {
             if (!rendering) {
                 return;
@@ -593,7 +593,7 @@ Wolf.Game = (function() {
         nextFrame();
     }
 
-    
+
     /**
      * @description Start playing the specified level of the specified episode.
      * @memberOf Wolf.Game
@@ -605,57 +605,57 @@ Wolf.Game = (function() {
         if (!Wolf.Episodes[episodeNum].enabled) {
             return;
         }
-        
+
         playing = false;
         rendering = false;
-        
+
         game.episodeNum = episodeNum;
         game.levelNum = levelNum;
 
         var episode = Wolf.Episodes[game.episodeNum];
-        
+
         Wolf.Level.load(episode.levels[game.levelNum].file, function(error, level) {
             if (error) {
                 throw error;
             }
-            
+
             $("#game .renderer .floor").css({
                 "background-color" : "rgb("
                     + level.floor[0] + ","
                     + level.floor[1] + ","
                     + level.floor[2] + ")"
             });
-            
+
             $("#game .renderer .ceiling").css({
                 "background-color" : "rgb("
                     + level.ceiling[0] + ","
                     + level.ceiling[1] + ","
                     + level.ceiling[2] + ")"
             });
-            
-           
+
+
             game.level = level;
-            
+
             levelMusic = level.music;
-            
+
             Wolf.Level.scanInfoPlane(level, game.skill); // Spawn items/guards
-            
+
             /*
             game.player.position.x = 1944862;
             game.player.position.y = 2156427;
             game.player.angle = 8507;
             */
-            
+
             $("#game .loading").show();
 
             preloadLevelAssets(level, function() {
-                
+
                 Wolf.Sound.startMusic(level.music);
-                
+
                 game.player = Wolf.Player.spawn(level.spawn, level, game.skill, game.player);
-                
+
                 game.player.startScore = game.player.score;
-                
+
                 level.state.startTime = (new Date).getTime();
                 level.state.elapsedTime = 0;
 
@@ -664,7 +664,7 @@ Wolf.Game = (function() {
                 startRenderCycle(game);
                 Wolf.Input.reset();
                 Wolf.Input.lockPointer();
-                
+
                 $("#game .loading").hide();
                 $("#game").focus();
                 $("#game .renderer .player-weapon").show();
@@ -698,21 +698,21 @@ Wolf.Game = (function() {
                 }
             }
         }
-       
+
         for (x=0;x<64;++x) {
             for (y=0;y<64;++y) {
                 addTexture(level.wallTexX[x][y]);
                 addTexture(level.wallTexY[x][y]);
             }
         }
-        
+
         // static sprites
         f = spritePath + "002_053.png";
         if (!preloadSprites[f]) {
             files.push(f);
             preloadSprites[f] = true
         }
-        
+
         /*
         for (i=0;i<level.state.guards.length;++i) {
             texture = level.state.guards[i].sprite;
@@ -725,22 +725,27 @@ Wolf.Game = (function() {
             }
         }
         */
-        
+
         for (i=0;i<files.length;++i) {
             files[i] = "preload!timeout=5!" + files[i];
         }
-        
+
         if (files.length) {
-            Modernizr.load({
-                load : files,
-                complete : callback
+            yepnope({
+              load : files,
+              complete : callback
             });
+
+            //Modernizr.load({
+            //    load : files,
+            //    complete : callback
+            //});
         } else {
             callback();
         }
     }
-    
-   
+
+
     /**
      * @description Start a new game with the specified skill level.
      * @memberOf Wolf.Game
@@ -752,12 +757,12 @@ Wolf.Game = (function() {
             levelMusic = null;
             Wolf.Sound.stopAllSounds();
         }
-        
+
         $("#game .renderer .death").hide();
         $("#game .renderer .damage-flash").hide();
         $("#game .renderer .bonus-flash").hide();
         $("#game").show();
-        
+
         var game = {
             episode : -1,
             level : -1,
@@ -768,10 +773,10 @@ Wolf.Game = (function() {
             totalTime : 0
         };
         currentGame = game; // for debugging only
-        
+
         return game;
     }
-    
+
     function endGame() {
         // cancel game cycle
         if (hndCycle) {
@@ -790,19 +795,19 @@ Wolf.Game = (function() {
             togglePause();
         }
     }
-    
+
     function startVictoryText(game) {
         endGame();
         $("#game").fadeOut(null, function() {
-            var name = "victory" + (game.episodeNum+1), 
+            var name = "victory" + (game.episodeNum+1),
                 num = (game.episodeNum == 2) ? 1 : 2;
-                
+
             Wolf.Menu.showText(name, num, function() {
                 Wolf.Menu.show("main");
             });
         });
     }
-    
+
     /**
      * @description Start the post-level intermission.
      * @memberOf Wolf.Game
@@ -819,28 +824,28 @@ Wolf.Game = (function() {
             secretRatio = levelState.totalSecrets ? ((levelState.foundSecrets / levelState.totalSecrets * 100) >> 0) : 0,
             treasureRatio = levelState.totalTreasure ? ((levelState.foundTreasure / levelState.totalTreasure * 100) >> 0) : 0,
             time = levelState.elapsedTime + ((new Date).getTime() - levelState.startTime),
-            totalTime, i,  
+            totalTime, i,
             avgKill = 0, avgSecret = 0, avgTreasure = 0;
-            
+
         playing = false;
 
         Wolf.Sound.startMusic("music/URAHERO.ogg");
-        
+
         $("#game .renderer").hide();
         $("#game .fps").hide();
         $("#game .intermission .digit").hide();
         $("#game .intermission").show();
-        
+
         $("#game .intermission .background").hide();
         $("#game .intermission .background-secret").hide();
         $("#game .intermission .background-victory").hide();
         $("#game .intermission .stat").hide();
         $("#game .intermission .victory-stat").hide();
         $("#game .intermission .bj").hide();
-        
+
         // 99 mins max
         time = Math.min(99*60, Math.round(time / 1000));
-        
+
         killRatio = Math.min(killRatio, 100);
         secretRatio = Math.min(secretRatio, 100);
         treasureRatio = Math.min(treasureRatio, 100);
@@ -849,18 +854,18 @@ Wolf.Game = (function() {
         game.secretRatios.push(secretRatio);
         game.treasureRatios.push(treasureRatio);
         game.totalTime += time;
-       
+
         // secret level
-        if (game.levelNum == 9) { 
+        if (game.levelNum == 9) {
             $("#game .intermission .background-secret").show();
             $("#game .intermission .bj").show();
             bonus = 15000;
-            
+
         // boss level
-        } else if (game.levelNum == 8) { 
+        } else if (game.levelNum == 8) {
             $("#game .intermission .background-victory").show();
             $("#game .intermission .victory-stat").show();
-            
+
             totalTime = Math.min(99*60, game.totalTime);
             for (i=0;i<game.killRatios.length;i++) {
                 avgKill += game.killRatios[i];
@@ -874,10 +879,10 @@ Wolf.Game = (function() {
             avgKill = Math.round(avgKill / game.killRatios.length);
             avgSecret = Math.round(avgSecret / game.secretRatios.length);
             avgTreasure = Math.round(avgTreasure / game.treasureRatios.length);
-            
+
             setIntermissionNumber("total-time-minutes", (totalTime / 60) >> 0, true);
             setIntermissionNumber("total-time-seconds", ((totalTime / 60) % 1) * 60, true);
-            
+
             setIntermissionNumber("avg-kill-ratio", avgKill, false);
             setIntermissionNumber("avg-secret-ratio", avgSecret, false);
             setIntermissionNumber("avg-treasure-ratio", avgTreasure, false);
@@ -887,8 +892,8 @@ Wolf.Game = (function() {
             $("#game .intermission .background").show();
             $("#game .intermission .bj").show();
             $("#game .intermission .stat").show();
-            
-           
+
+
             if (parTime && parTime > time) {
                 bonus += (parTime - time) * parBonusAmount;
             }
@@ -904,23 +909,23 @@ Wolf.Game = (function() {
 
             time = time / 60;
             parTime = parTime / 60;
-            
+
             setIntermissionNumber("floor", game.levelNum + 1, false);
-            
+
             setIntermissionNumber("bonus", bonus, false);
-            
+
             setIntermissionNumber("time-minutes", time >> 0, true);
             setIntermissionNumber("time-seconds", (time % 1) * 60, true);
 
             setIntermissionNumber("par-minutes", parTime >> 0, true);
             setIntermissionNumber("par-seconds", (parTime % 1) * 60, true);
-            
+
             setIntermissionNumber("kill-ratio", killRatio, false);
             setIntermissionNumber("secret-ratio", secretRatio, false);
             setIntermissionNumber("treasure-ratio", treasureRatio, false);
-            
+
         }
-        
+
         function anim() {
             var now = (new Date).getTime(),
                 bjFrame = Math.floor(now / 500) % 2;
@@ -930,13 +935,13 @@ Wolf.Game = (function() {
             });
             intermissionAnim = requestAnimationFrame(anim);
         }
-        
+
         if (game.levelNum != 8) {
             if (!intermissionAnim) {
                 anim();
             }
         }
-        
+
         function exitIntermission() {
             if (intermissionAnim) {
                 cancelAnimationFrame(intermissionAnim);
@@ -945,7 +950,7 @@ Wolf.Game = (function() {
             $(document).off("keydown", progress);
             $("#game .intermission").hide();
         }
-        
+
         function progress(e) {
             var nextLevel;
             if (!$("#game .intermission").is(":visible")) {
@@ -972,7 +977,7 @@ Wolf.Game = (function() {
                             case 4: nextLevel = 4; break;
                             case 5: nextLevel = 3; break;
                             default: nextLevel = game.levelNum + 1; break;
-                        }                        
+                        }
                     } else {
                         nextLevel = game.levelNum + 1;
                     }
@@ -981,11 +986,11 @@ Wolf.Game = (function() {
                 startLevel(game, game.episodeNum, nextLevel);
             }
         }
-        
+
         $(document).on("keydown", progress);
     }
-    
-    
+
+
     /**
      * @description Update an intermission screen stat.
      * @private
@@ -1011,7 +1016,7 @@ Wolf.Game = (function() {
         digits.show();
     }
 
-    
+
     /**
      * @description Start red damage flash.
      * @memberOf Wolf.Game
@@ -1019,7 +1024,7 @@ Wolf.Game = (function() {
     function startDamageFlash() {
         $("#game .renderer .damage-flash").show().fadeOut(300);
     }
-    
+
     /**
      * @description Start bonus flash.
      * @memberOf Wolf.Game
@@ -1027,7 +1032,7 @@ Wolf.Game = (function() {
     function startBonusFlash() {
         $("#game .renderer .bonus-flash").show().fadeOut(300);
     }
-    
+
     /**
      * @description Show a notification.
      * @memberOf Wolf.Game
@@ -1036,7 +1041,7 @@ Wolf.Game = (function() {
     function notify(text) {
         Wolf.log(text);
     }
-    
+
     /**
      * @description Query fullscreen.
      * @memberOf Wolf.Game
@@ -1052,7 +1057,7 @@ Wolf.Game = (function() {
         }
         return false;
     }
-    
+
     /**
      * @description Fullscreen event handler.
      * @private
@@ -1065,7 +1070,7 @@ Wolf.Game = (function() {
             exitFullscreen();
         }
     }
-    
+
     /**
      * @description Toggle the fullscreen state
      * @private
@@ -1104,8 +1109,8 @@ Wolf.Game = (function() {
         }
         return false;
     }
-    
-    
+
+
     /**
      * @description Scale the game to fit fullscreen mode
      * @private
@@ -1124,7 +1129,7 @@ Wolf.Game = (function() {
             "-o-transform" : transform
         }).data("scale", zoom);
     }
-    
+
     /**
      * @description Scale the game to fit windowed mode
      * @private
@@ -1138,8 +1143,8 @@ Wolf.Game = (function() {
             "-o-transform" : ""
         }).data("scale", 1);
     }
-    
-    
+
+
     /**
      * @description Initialize the game module
      * @memberOf Wolf.Game
@@ -1149,7 +1154,7 @@ Wolf.Game = (function() {
             .on("mozfullscreenchange", fullscreenChange)
             .on("webkitfullscreenchange", fullscreenChange)
             .on("fullscreenchange", fullscreenChange);
-            
+
         Wolf.Input.bindKey("F11", function(e) {
             if (!keyInputActive) {
                 return;
@@ -1164,26 +1169,26 @@ Wolf.Game = (function() {
                 }
             }
         });
-        
+
         Wolf.Input.bindKey("P", function(e) {
             if (!keyInputActive) {
                 return;
             }
             togglePause();
         });
-        
+
         Wolf.Input.bindKey("ESC", function(e) {
             if (!keyInputActive) {
                 return;
             }
             exitToMenu();
         });
-       
+
         if (!isFullscreen() && (window.fullScreen || (window.innerWidth == screen.width && window.innerHeight == screen.height))) {
             toggleFullscreen();
         }
     }
-    
+
     /**
      * @description Exit to main menu
      * @memberOf Wolf.Game
@@ -1196,7 +1201,7 @@ Wolf.Game = (function() {
         keyInputActive = false;
         Wolf.Menu.show("main");
     }
-    
+
     /**
      * @description Resume game after coming from menu
      * @memberOf Wolf.Game
@@ -1211,8 +1216,8 @@ Wolf.Game = (function() {
             Wolf.Sound.startMusic(levelMusic);
         }
     }
-   
-    
+
+
     /**
      * @description Query the game state
      * @memberOf Wolf.Game
@@ -1221,8 +1226,8 @@ Wolf.Game = (function() {
     function isPlaying() {
         return playing;
     }
-    
-    
+
+
     /**
      * @description Toggle the pause state.
      * @private
@@ -1237,8 +1242,8 @@ Wolf.Game = (function() {
         }
         $("#game .renderer div.pause.overlay").toggle(paused);
     }
-    
-    
+
+
     function enableMouse(enable) {
         mouseEnabled = enable;
     }
@@ -1255,17 +1260,17 @@ Wolf.Game = (function() {
         }
         return c;
     }
-    
+
     function bindControl(action, keys) {
         controls[action] = keys;
     }
-    
+
     /*
     function dump() {
         console.log(currentGame);
         window.open("data:text/plain," + JSON.stringify(currentGame), "dump");
     }
-    
+
     function debugGodMode(enable) {
         if (currentGame && currentGame.player) {
             if (enable) {
@@ -1276,7 +1281,7 @@ Wolf.Game = (function() {
             Wolf.log("God mode " + (enable ? "enabled" : "disabled"));
         }
     }
-    
+
     function debugNoTarget(enable) {
         if (currentGame && currentGame.player) {
             if (enable) {
@@ -1287,24 +1292,24 @@ Wolf.Game = (function() {
             Wolf.log("No target " + (enable ? "enabled" : "disabled"));
         }
     }
-    
+
     function debugVictory() {
         if (currentGame && currentGame.player) {
             Wolf.log("Winning!");
             Wolf.Game.startIntermission(currentGame);
         }
     }
-    
+
     function debugEndEpisode() {
         if (currentGame && currentGame.player) {
             victory(currentGame);
         }
     }
-    
+
     function debugToggleAI(enable) {
         processAI = !!enable;
     }
-    
+
     function debugGiveAll() {
         if (currentGame && currentGame.player) {
             Wolf.Player.givePoints(currentGame.player, 10000);
@@ -1318,7 +1323,7 @@ Wolf.Game = (function() {
         }
     }
     */
-   
+
     return {
         startGame : startGame,
         startLevel : startLevel,
@@ -1336,7 +1341,7 @@ Wolf.Game = (function() {
         resume : resume,
         victory : victory,
         endEpisode : endEpisode
-        
+
         /*
         dump : dump,
         debugGodMode : debugGodMode,

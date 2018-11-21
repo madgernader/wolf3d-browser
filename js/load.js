@@ -1,26 +1,26 @@
 /*
 * ===========================================================================
-* 
+*
 * Wolf3D Browser Version GPL Source Code
-* Copyright (C) 2012 id Software LLC, a ZeniMax Media company. 
-* 
-* This file is part of the Wolf3D Browser Version GPL Source Code ("Wolf3D Browser Source Code").  
-* 
+* Copyright (C) 2012 id Software LLC, a ZeniMax Media company.
+*
+* This file is part of the Wolf3D Browser Version GPL Source Code ("Wolf3D Browser Source Code").
+*
 * Wolf3D Browser Source Code is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 2 of the License, or
 * (at your option) any later version.
-* 
+*
 * Wolf3D Browser Source Code is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License version 2
 * along with Wolf3D Browser Source Code.  If not, see <http://www.gnu.org/licenses/>.
-* 
+*
 * If you have questions concerning this license, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
-* 
+*
 * ===========================================================================
 */
 
@@ -54,9 +54,9 @@ var files = [
     "js/level.js",
     "js/raycaster.js",
     "js/renderer.js",
-   
+
     "js/episodes.js",
-    "js/maps.js",
+    "js/maps.js",											//need to create and populate from maps.sample
 
     "preload!art/menubg_main.png",
     "preload!art/menuitems.png",
@@ -83,14 +83,16 @@ var files2 = [
 ];
 
 $(document).ready(function() {
-  
+
     var progress = $("<div>"),
         n = 0;
 
     progress.addClass("load-progress").appendTo("#title-screen");
     $("#title-screen").show();
-    
-    
+
+//yepnope is deprecated
+//need to research what it does and replace this
+/*
     yepnope.addPrefix("preload", function(resource) {
         resource.noexec = true;
         resource.instead = function(input, callback) {
@@ -102,16 +104,41 @@ $(document).ready(function() {
         return resource;
     });
 
-    
+*/
+//Modernizr.load is not a function
+// need to rewrite this as well
+
+
+//modernizer.load([{}])
+
+		yepnope(
+			{
+				load: files,
+				callback : function(file) {
+					progress.width((++n / files.length) * 100 + "%");
+				},
+				complete : function() {
+					progress.remove();	//hide load bar on finish
+					$("#title-screen").fadeOut(1500, function() { //css fade title
+							Wolf.Input.init();
+							Wolf.Game.init();
+							Wolf.Menu.show();
+					});
+				}
+			}
+		);
+
+
+/*
     Modernizr.load([
         {
-            load : files,
-            callback : function(file) {
+            load : files,							//load files in list
+            callback : function(file) {															//load progress bar
                 progress.width((++n / files.length) * 100 + "%");
             },
             complete : function() {
-                progress.remove();
-                $("#title-screen").fadeOut(1500, function() {
+                progress.remove();	//hide load bar on finish
+                $("#title-screen").fadeOut(1500, function() { //css fade title
                     Wolf.Input.init();
                     Wolf.Game.init();
                     Wolf.Menu.show();
@@ -121,6 +148,10 @@ $(document).ready(function() {
             }
         }
     ]);
+*/
+
+
+
 });
 
 })(jQuery);
